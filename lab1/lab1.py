@@ -1,15 +1,34 @@
 import cv2 as cv
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.patches import Rectangle
+import matplotlib
 
 
-def show_img(window_name, img, ascii_key_to_exit=13):
+def show_img(window_name, img, ascii_key_to_exit=13, save_img=False, img_name=''):
+    if save_img:
+        cv.imwrite(img_name, img)
     while True:
         cv.imshow(window_name, np.uint8(img))
         key = cv.waitKey(1) & 0xFF
         if key == ascii_key_to_exit:
             cv.destroyAllWindows()
             break
+
+
+def add_img_title(text, img, bgr_background=(0, 0, 0), bgr_text=(255, 255, 255)):
+
+    imgB = np.full(shape=(int(img.shape[0] / 8), img.shape[1]), fill_value=bgr_background[0])
+    imgG = np.full(shape=(int(img.shape[0] / 8), img.shape[1]), fill_value=bgr_background[1])
+    imgR = np.full(shape=(int(img.shape[0] / 8), img.shape[1]), fill_value=bgr_background[2])
+    title_img = np.dstack((imgB, imgG, imgR))
+
+    title_size = cv.getTextSize(text, cv.FONT_HERSHEY_SIMPLEX, 1, 2)[0]
+    titleX = int((title_img.shape[1] - title_size[0]) / 2)
+    titleY = int((title_img.shape[0] + title_size[1]) / 2)
+    title_img = cv.putText(title_img, text, (titleX, titleY), cv.FONT_HERSHEY_SIMPLEX, 1, bgr_text, 2)
+    img = np.vstack((title_img, img))
+    return img
 
 
 def hist(img):
@@ -21,6 +40,10 @@ def hist(img):
             value = img[j][k]
             h[value] += 1
     return h
+
+
+def rgb2gray(I):
+    return 0.299*I[:, :, 0] + 0.587*I[:, :, 1] + 0.144*I[:, :, 2]
 
 
 escape_key_ascii = 13
@@ -75,15 +98,18 @@ pixel_values = np.arange(0, 256, 1)
 ax1 = plt.subplot(221)
 ax1.set_title('Mandril image histogram')
 ax1.plot(pixel_values, mandril_histogram)
+ax1.set_xlim(0, 255)
 
 ax2 = plt.subplot(222)
 ax2.set_title('Mandril image OpenCV histogram')
 ax2.plot(pixel_values, mandril_histogram_opencv)
+ax2.set_xlim(0, 255)
 
 ax3 = plt.subplot(212)
 ax3.plot(pixel_values, mandril_histogram, label='User histogram')
 ax3.plot(pixel_values, mandril_histogram_opencv, label='OpenCV histogram')
 ax3.legend()
+ax3.set_xlim(0, 255)
 plt.show(block=True)
 
 mandril_img_gray_equ = cv.equalizeHist(mandril_img_gray)
@@ -96,16 +122,75 @@ mandril_img_gray_cla_histogram = cv.calcHist([mandril_img_gray_cla], [0], None, 
 
 ax1 = plt.subplot(221)
 ax1.plot(pixel_values, mandril_img_gray_equ_histogram)
-ax1.set_title('Histogram')
+ax1.set_title('Classic histogram')
+ax1.set_xlim(0, 255)
 
 ax2 = plt.subplot(222)
 ax2.plot(pixel_values, mandril_img_gray_cla_histogram)
-ax2.set_title('Histogram')
+ax2.set_title('CLAHE histogram')
+ax2.set_xlim(0, 255)
 
 ax3 = plt.subplot(212)
+ax3.set_xlim(0, 255)
 ax3.plot(pixel_values, mandril_img_gray_equ_histogram, label='Classic')
 ax3.plot(pixel_values, mandril_img_gray_cla_histogram, label='CLAHE')
 ax3.legend()
 plt.show(block=True)
 
+mandril_img_gray = cv.cvtColor(mandril_img_gray, cv.COLOR_GRAY2BGR)
+mandril_img_gray_equ = cv.cvtColor(mandril_img_gray_equ, cv.COLOR_GRAY2BGR)
+mandril_img_gray_cla = cv.cvtColor(mandril_img_gray_cla, cv.COLOR_GRAY2BGR)
+mandril_img_gray_text = add_img_title('Gray image', mandril_img_gray)
+mandril_img_gray_equ_text = add_img_title('Classic histogram equalization', mandril_img_gray_equ)
+mandril_img_gray_cla_text = add_img_title('CLAHE histogram equalization', mandril_img_gray_cla)
+compared_histogram_equ_img = np.hstack((mandril_img_gray_text, mandril_img_gray_equ_text, mandril_img_gray_cla_text))
+show_img('Gray vs Classic vs CLAHE', compared_histogram_equ_img, 13)
 
+ax1 = plt.subplot(221)
+ax1.imshow(mandril_img)
+ax1.title('Original')
+ax1.axis('off')
+
+ax2 = plt.subplot(222)
+ax1.imshow(cv.GaussianBlur(mandril_img, (5, 5)))
+ax1.title('Original')
+ax1.axis('off')
+
+ax3
+
+ax4
+
+plt.show(block=True)
+
+
+I = plt.imread('mandril.jpg')
+
+fig, ax = plt.subplots(1)
+plt.imshow(I)
+plt.title('Mandril')
+plt.axis('off')
+
+plt.imsave('mandril.jpg', I)
+
+x = [100, 150, 200, 250]
+y = [50, 100, 150, 200]
+plt.plot(x, y, 'r.', markersize=10)
+
+rect = Rectangle((50, 50), 50, 100, fill=False, ec='r')
+ax.add_patch(rect)
+plt.show()
+
+plt.figure(1)
+IG = rgb2gray(I)
+plt.imshow(IG)
+plt.title('Mandril gray')
+plt.axis('off')
+plt.gray()
+plt.show()
+
+plt.figure(1)
+_HSV = matplotlib.colors.rgb_to_hsv(I)
+plt.imshow(_HSV)
+plt.title('Mandril HSV')
+plt.axis('off')
+plt.show()
