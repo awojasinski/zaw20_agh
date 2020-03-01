@@ -146,19 +146,93 @@ mandril_img_gray_cla_text = add_img_title('CLAHE histogram equalization', mandri
 compared_histogram_equ_img = np.hstack((mandril_img_gray_text, mandril_img_gray_equ_text, mandril_img_gray_cla_text))
 show_img('Gray vs Classic vs CLAHE', compared_histogram_equ_img, 13)
 
+mandril_img = cv.cvtColor(mandril_img, cv.COLOR_BGR2RGB)
+
 ax1 = plt.subplot(221)
 ax1.imshow(mandril_img)
-ax1.title('Original')
+ax1.set_title('Original')
 ax1.axis('off')
 
 ax2 = plt.subplot(222)
-ax1.imshow(cv.GaussianBlur(mandril_img, (5, 5)))
-ax1.title('Original')
+ax2.imshow(cv.GaussianBlur(mandril_img, (5, 5), 0))
+ax2.set_title('Gaussian blur 5x5')
+ax2.axis('off')
+
+ax3 = plt.subplot(223)
+ax3.imshow(cv.GaussianBlur(mandril_img, (9, 9), 0))
+ax3.set_title('Gaussian blur 9x9')
+ax3.axis('off')
+
+ax4 = plt.subplot(224)
+ax4.imshow(cv.GaussianBlur(mandril_img, (13, 13), 0))
+ax4.set_title('Gaussian blur 13x13')
+ax4.axis('off')
+
+plt.show(block=True)
+
+mandril_img_gray_gaussian = cv.GaussianBlur(mandril_img_gray, (3,3), 0)
+
+mandril_img_grad_x = cv.Sobel(mandril_img_gray_gaussian, cv.CV_16S, 1, 0, ksize=3, scale=1, delta=0, borderType=cv.BORDER_DEFAULT)
+mandril_img_grad_y = cv.Sobel(mandril_img_gray_gaussian, cv.CV_16S, 0, 1, ksize=3, scale=1, delta=0, borderType=cv.BORDER_DEFAULT)
+
+mandril_img_grad_x_abs = abs(mandril_img_grad_x)
+mandril_img_grad_y_abs = abs(mandril_img_grad_y)
+
+mandril_img_grad = cv.addWeighted(mandril_img_grad_x_abs, 0.5, mandril_img_grad_y_abs, 0.5, 0)
+
+ax1 = plt.subplot(221)
+ax1.imshow(mandril_img_gray)
+ax1.set_title('Original gray')
 ax1.axis('off')
 
-ax3
+ax2 = plt.subplot(222)
+ax2.imshow(mandril_img_grad)
+ax2.set_title('Sobel')
+ax2.axis('off')
 
-ax4
+ax3 = plt.subplot(223)
+ax3.imshow(mandril_img_grad_x_abs)
+ax3.set_title('Sobel X')
+ax3.axis('off')
+
+ax4 = plt.subplot(224)
+ax4.imshow(mandril_img_grad_y_abs)
+ax4.set_title('Sobel Y')
+ax4.axis('off')
+
+plt.show(block=True)
+
+ax1 = plt.subplot(121)
+ax1.imshow(mandril_img_grad)
+ax1.set_title('Sobel')
+ax1.axis('off')
+
+ax2 = plt.subplot(122)
+ax2.imshow(cv.Laplacian(mandril_img_gray_gaussian, cv.CV_16S, ksize=3))
+ax2.set_title('Laplacian')
+ax2.axis('off')
+
+plt.show(block=True)
+
+ax1 = plt.subplot(221)
+ax1.imshow(mandril_img)
+ax1.set_title('Original')
+ax1.axis('off')
+
+ax2 = plt.subplot(222)
+ax2.imshow(cv.medianBlur(mandril_img, 5))
+ax2.set_title('Median blur 5x5')
+ax2.axis('off')
+
+ax3 = plt.subplot(223)
+ax3.imshow(cv.medianBlur(mandril_img, 9))
+ax3.set_title('Median blur 9x9')
+ax3.axis('off')
+
+ax4 = plt.subplot(224)
+ax4.imshow(cv.medianBlur(mandril_img, 13))
+ax4.set_title('Median blur 13x13')
+ax4.axis('off')
 
 plt.show(block=True)
 
@@ -178,7 +252,7 @@ plt.plot(x, y, 'r.', markersize=10)
 
 rect = Rectangle((50, 50), 50, 100, fill=False, ec='r')
 ax.add_patch(rect)
-plt.show()
+plt.show(block=True)
 
 plt.figure(1)
 IG = rgb2gray(I)
@@ -186,11 +260,11 @@ plt.imshow(IG)
 plt.title('Mandril gray')
 plt.axis('off')
 plt.gray()
-plt.show()
+plt.show(block=True)
 
 plt.figure(1)
 _HSV = matplotlib.colors.rgb_to_hsv(I)
 plt.imshow(_HSV)
 plt.title('Mandril HSV')
 plt.axis('off')
-plt.show()
+plt.show(block=True)
