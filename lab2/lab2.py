@@ -2,12 +2,17 @@ import cv2 as cv
 import numpy as np
 import matplotlib.pyplot as plt
 
+TP = 0
+TN = 0
+FP = 0
+FN = 0
 
 kernel = np.ones((3, 3), np.int)
 
 for i in range(300, 1099, 1):
     I_prev = cv.imread('pedestrants/input/in%06d.jpg' % i)
     I = cv.imread('pedestrants/input/in%06d.jpg' % int(i+1))
+    I_GT = cv.imread('pedestrants/groundtruth/gt%06d.png' % i)
     '''
     cv.imshow('I', I)
     cv.waitKey(10)
@@ -41,4 +46,29 @@ for i in range(300, 1099, 1):
 
     cv.imshow("frames", I_VIS)
 
+    TP_M = np.logical_and((I_prev == 255), (I_GT == 255))
+    TP_S = np.sum(TP_M)
+    TP = TP + TP_S
+
+    TN_M = np.logical_and((I_prev == 0), (I_GT == 0))
+    TN_S = np.sum(TN_M)
+    TN = TN + TN_S
+
+    FP_M = np.logical_and((I_prev == 255), (I_GT == 0))
+    FP_S = np.sum(FP_M)
+    FP = FP + FP_S
+
+    FN_M = np.logical_and((I_prev == 0), (I_GT == 255))
+    FN_S = np.sum(FN_M)
+    FN = FN + FN_S
+
     cv.waitKey(10)
+
+P = TP / (TP + FP)
+R = TP / (TP + FN)
+F1 = (2*P*R) / (P + R)
+
+
+print(P)
+print(R)
+print(F1)
