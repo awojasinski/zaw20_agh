@@ -3,12 +3,6 @@ import numpy as np
 
 # iteracja po każdym zbiorze obrazów
 for img_source in ['highway', 'office', 'pedestrants']:
-    # zmienne do pomiaru dokładności algorytmu
-    TP = 0
-    TN = 0
-    FP = 0
-    FN = 0
-
     kernel = np.ones((2, 2), np.int)
     threshold_value = 10
 
@@ -28,6 +22,12 @@ for img_source in ['highway', 'office', 'pedestrants']:
 
     # dwie metody obliczania modelu tła
     for method in ['mog', 'knn']:
+        # zmienne do pomiaru dokładności algorytmu
+        TP = 0
+        TN = 0
+        FP = 0
+        FN = 0
+
         if method == 'mog':
             model = cv.createBackgroundSubtractorMOG2(history=history_len, varThreshold=mog_model_thresh, detectShadows=False)
         else:

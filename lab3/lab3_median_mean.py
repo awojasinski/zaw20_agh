@@ -5,12 +5,6 @@ import numpy as np
 for img_source in ['highway', 'office', 'pedestrants']:
     N = 60  # rozmiar bufora
 
-    # zmienne do pomiaru dokładności algorytmu
-    TP = 0
-    TN = 0
-    FP = 0
-    FN = 0
-
     kernel = np.ones((2, 2), np.int)
     threshold_value = 10
 
@@ -33,6 +27,12 @@ for img_source in ['highway', 'office', 'pedestrants']:
 
     # dwie metody obliczania modelu tła
     for method in ['mean', 'median']:
+        # zmienne do pomiaru dokładności algorytmu
+        TP = 0
+        TN = 0
+        FP = 0
+        FN = 0
+
         # utworzenie buforu zdjęć potrzebne do stworzenia modelu
         # zdjęcia przed pojawieniem się ruchu na obrazie
         for i in range(roi_start-N, roi_start, step_frame):
@@ -59,11 +59,10 @@ for img_source in ['highway', 'office', 'pedestrants']:
 
             if method == 'median':
                 I_model = np.median(BUF, axis=2)
+                I_mov = cv.absdiff(I_G, I_model)
             elif method == 'mean':
                 I_model = np.mean(BUF, axis=2)
-
-            I_model = I_model.astype(np.uint8)
-            I_mov = cv.absdiff(I_G, I_model)
+                I_mov = abs(I_G - I_model)
 
             I_B = 1 * (I_mov > threshold_value)  # konwersja typu logicznego na liczbowy
             I_B = I_B * 255  # zamiana zakresu z {0, 1} na {0, 255} (poprawne wyświetlanie)

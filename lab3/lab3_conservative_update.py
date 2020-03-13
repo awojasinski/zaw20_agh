@@ -16,7 +16,7 @@ for img_source in ['highway', 'office', 'pedestrants']:
     alpha = 0.01  # waga nowej klatki w obliczniu modelu
 
     # dwie metody obliczania modelu tła
-    for method in ['mean', 'median']:
+    for method in ['median', 'mean']:
         # zmienne do pomiaru dokładności algorytmu
         TP = 0
         TN = 0
@@ -32,7 +32,7 @@ for img_source in ['highway', 'office', 'pedestrants']:
         I_model = np.zeros((YY, XX), np.uint8)
         I_G = cv.cvtColor(I, cv.COLOR_BGR2GRAY)
         I_model = I_G
-
+        I_model_prev = I_G
         for i in range(roi_start, roi_end, step_frame):
 
             I = cv.imread(img_source + '/input/in%06d.jpg' % i)
@@ -45,6 +45,8 @@ for img_source in ['highway', 'office', 'pedestrants']:
                 # Srednia krocząca
                 I_model = I_model.astype(np.float64)
                 I_model = alpha*I_G + (1-alpha)*I_model
+                if 'I_B' in globals():
+                    I_model = np.where(I_B == 0, I_model, I_model_prev)
                 I_mov = abs(I_G - I_model)
 
             elif method == 'median':
@@ -55,7 +57,11 @@ for img_source in ['highway', 'office', 'pedestrants']:
                     I_model = I_model - 1
                 else:
                     I_model = I_model
+                if 'I_B' in globals():
+                    I_model = np.where(I_B == 0, I_model, I_model_prev)
                 I_mov = cv.absdiff(I_G, I_model)
+
+            I_model_prev = I_model
 
             I_B = 1 * (I_mov > threshold_value)  # konwersja typu logicznego na liczbowy
             I_B = I_B * 255  # zamiana zakresu z {0, 1} na {0, 255} (poprawne wyświetlanie)
@@ -110,6 +116,7 @@ for img_source in ['highway', 'office', 'pedestrants']:
             cv.waitKey(10)
             I_prev = I
 
+        del globals()['I_B']
         cv.destroyAllWindows()
 
         P = TP / (TP + FP)
