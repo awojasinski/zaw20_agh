@@ -21,6 +21,7 @@ for img_source in ['highway', 'office', 'pedestrants']:
     YY = I.shape[0]     # wysokość
     XX = I.shape[1]     # szerokość
 
+    # inicjalizacja modelu tła i buforu
     I_model = np.zeros((YY, XX), np.uint8)
     BUF = np.zeros((YY, XX, N), np.uint8)
     iN = 0
@@ -115,7 +116,6 @@ for img_source in ['highway', 'office', 'pedestrants']:
             FN = FN + FN_S
 
             cv.waitKey(10)
-            I_prev = I
 
         cv.destroyAllWindows()
 

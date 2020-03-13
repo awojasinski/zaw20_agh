@@ -89,7 +89,6 @@ for img_source in ['highway', 'office', 'pedestrants']:
             FN = FN + FN_S
 
             cv.waitKey(10)
-            I_prev = I
 
         cv.destroyAllWindows()
 
@@ -103,5 +102,3 @@ for img_source in ['highway', 'office', 'pedestrants']:
         print('Czułość: ', R)
         print('F1: ', F1)
         print()
-
-

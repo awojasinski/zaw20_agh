@@ -45,8 +45,9 @@ for img_source in ['highway', 'office', 'pedestrants']:
                 # Srednia krocząca
                 I_model = I_model.astype(np.float64)
                 I_model = alpha*I_G + (1-alpha)*I_model
-                if 'I_B' in globals():
-                    I_model = np.where(I_B == 0, I_model, I_model_prev)
+                # konserwatywne podejście do aktualizacji modelu tła
+                if 'I_B' in globals():  # sprawdzenie czy istnieje taka zmienna
+                    I_model = np.where(I_B == 0, I_model, I_model_prev)  # aktualizacja tylko w miejscach gdzie było tło
                 I_mov = abs(I_G - I_model)
 
             elif method == 'median':
@@ -57,8 +58,9 @@ for img_source in ['highway', 'office', 'pedestrants']:
                     I_model = I_model - 1
                 else:
                     I_model = I_model
-                if 'I_B' in globals():
-                    I_model = np.where(I_B == 0, I_model, I_model_prev)
+                # konserwatywne podejście do aktualizacji modelu tła
+                if 'I_B' in globals():  # sprawdzenie czy istnieje taka zmienna
+                    I_model = np.where(I_B == 0, I_model, I_model_prev)  # aktualizacja tylko w miejscach gdzie było tło
                 I_mov = cv.absdiff(I_G, I_model)
 
             I_model_prev = I_model
@@ -114,9 +116,8 @@ for img_source in ['highway', 'office', 'pedestrants']:
             FN = FN + FN_S
 
             cv.waitKey(10)
-            I_prev = I
 
-        del globals()['I_B']
+        del globals()['I_B']    # usunięcie zmiennej będącej obrazem binarnym z wykrytymi obiektami pierwszoplanowymi
         cv.destroyAllWindows()
 
         P = TP / (TP + FP)
