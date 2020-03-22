@@ -36,8 +36,8 @@ def pyramid(im, max_scale):
 
 
 # wczytanie obrazów
-I = cv.imread('I.jpg')
-J = cv.imread('J.jpg')
+I = cv.imread('data/I.jpg')
+J = cv.imread('data/J.jpg')
 
 # konwersja przestrzeni barw
 I = cv.cvtColor(I, cv.COLOR_BGR2GRAY)
