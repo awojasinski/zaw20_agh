@@ -13,11 +13,11 @@ objpoints = []
 imgpoints_L = []
 imgpoints_R = []
 
-for i in range(1, 14):
+for i in range(1, 13):
     # Wczytaj obraz i konwersja do obrazu monochromatycznego
     img_L = cv.imread('images_left/left%02d.jpg' % i)
-    gray_L = cv.cvtColor(img_L, cv.COLOR_BGR2GRAY)
     img_R = cv.imread('images_right/right%02d.jpg' % i)
+    gray_L = cv.cvtColor(img_L, cv.COLOR_BGR2GRAY)
     gray_R = cv.cvtColor(img_R, cv.COLOR_BGR2GRAY)
 
     # Wyszukiwanie wzorca kalibracyjnego na zdjęciu
@@ -30,10 +30,10 @@ for i in range(1, 14):
         objpoints.append(objp)
 
         # Poprawa lokalizacji punktow przecięcia szachownicy
-        corners2 = cv.cornerSubPix(gray_L, corners_L, (11,11), (-1,-1), criteria)
+        corners2 = cv.cornerSubPix(gray_L, corners_L, (11, 11), (-1, -1), criteria)
         imgpoints_L.append(corners2)
         cv.drawChessboardCorners(img_L, (7, 6), corners2, ret_L)
-        corners2 = cv.cornerSubPix(gray_R, corners_R, (11,11), (-1,-1), criteria)
+        corners2 = cv.cornerSubPix(gray_R, corners_R, (11, 11), (-1, -1), criteria)
         imgpoints_R.append(corners2)
         cv.drawChessboardCorners(img_R, (7, 6), corners2, ret_R)
 
@@ -44,7 +44,7 @@ ret_L, mtx_L, dist_L, rvecs_L, tvecs_L = cv.calibrateCamera(objpoints, imgpoints
 ret_R, mtx_R, dist_R, rvecs_R, tvecs_R = cv.calibrateCamera(objpoints, imgpoints_R, gray_R.shape[::-1], None, None)
 
 retval, cameraMatrix1, distCoeffs1, cameraMatrix2, distCoeffs2, R, T, E, F = cv.stereoCalibrate(
-    objpoints,imgpoints_L,imgpoints_R,mtx_L,dist_L,mtx_R,dist_R,gray_L.shape[::-1])
+    objpoints, imgpoints_L, imgpoints_R, mtx_L, dist_L, mtx_R, dist_R, gray_L.shape[::-1])
 
 R1, R2, P1, P2, Q, validPixROI1, validPixROI2 = cv.stereoRectify(cameraMatrix1, distCoeffs1,
                                                                  cameraMatrix2, distCoeffs2,
@@ -53,7 +53,7 @@ R1, R2, P1, P2, Q, validPixROI1, validPixROI2 = cv.stereoRectify(cameraMatrix1, 
 map1_L, map2_L = cv.initUndistortRectifyMap(cameraMatrix1, distCoeffs1, R1, P1, gray_L.shape[::-1], cv.CV_16SC2)
 map1_R, map2_R = cv.initUndistortRectifyMap(cameraMatrix2, distCoeffs2, R2, P2, gray_L.shape[::-1], cv.CV_16SC2)
 
-for i in range(1, 14):
+for i in range(1, 13):
     img_L = cv.imread('images_left/left%02d.jpg' % i)
     img_R = cv.imread('images_right/right%02d.jpg' % i)
 
