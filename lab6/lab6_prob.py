@@ -1,56 +1,74 @@
 import cv2 as cv
 import numpy as np
-import matplotlib.pyplot as plt
-
-#cap = cv.VideoCapture('vid1_IR.avi')
-DMP = cv.imread('dmp.png')
-DMP = cv.cvtColor(DMP, cv.COLOR_BGR2GRAY)
-DMP.astype(np.float32)
-DMP_1 = DMP/50      # prawdopodobieństwo zakres 0-1
-DMP_0 = 1 - DMP_1   # negacja prawdopodobieństwa
-result = np.zeros(shape=(360, 480), dtype=np.float32)
-
-thresholdVal = 45
-error_val = 30
-kernel = np.ones((2, 2), np.uint8)
-r_height = 194
-r_width = 64
-step = 3
 
 
-#while cap.isOpened():
-#ret, frame = cap.read()
-frame = cv.imread('frame_003090.png')
-G = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
+cap = cv.VideoCapture('vid1_IR.avi')
 
-B = cv.threshold(G, thresholdVal, 1, cv.THRESH_BINARY)[1]
-B.astype(np.float32)
-for x in range(0, frame.shape[1], step):
-    for y in range(0, frame.shape[0], step):
-        if y + r_height >= frame.shape[0]:
-            h_mask = r_height - ((y + r_height) - frame.shape[0])
+DPM = cv.imread('dmp.png')
+DPM = cv.cvtColor(DPM, cv.COLOR_BGR2GRAY)
+DPM = DPM.astype(np.float32)
+DPM_1 = DPM/float(50)
+DPM_0 = 1 - DPM_1
+
+sampleSize = (64, 192)
+stepSize = 16
+threshVal = 45
+
+while (cap.isOpened()):
+    ret, frame = cap.read()
+    I_G = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
+    B = cv.threshold(I_G, threshVal, 255, cv.THRESH_TOZERO)[1]
+
+    # Okno przesuwne
+    result = np.zeros((360, 480), dtype=np.float32)
+
+    for y in range(0, frame.shape[0], stepSize):
+        if y + sampleSize[1] >= frame.shape[0]:
+            win_height = frame.shape[0]
+            mask_height = sampleSize[1] - ((y + sampleSize[1]) - frame.shape[0])
         else:
-            h_mask = r_height
-        if x + r_width >= frame.shape[1]:
-            w_mask = r_width - ((x + r_width) - frame.shape[1])
-        else:
-            w_mask = r_width
-        xx = np.sum(B[y:y+h_mask, x:x+w_mask]*DMP_1[0:h_mask, 0:w_mask]+(1-B[y:y+h_mask, x:x+w_mask])*DMP_0[0:h_mask, 0:w_mask])
-        result[y, x] = xx
+            win_height = sampleSize[1] + y
+            mask_height = sampleSize[1]
+        p_y = y + int(sampleSize[1] / 2) if y + int(sampleSize[1] / 2) < frame.shape[0] else y
+        for x in range(0, frame.shape[1], stepSize):
+            if x + sampleSize[0] >= frame.shape[1]:
+                win_width = frame.shape[1]
+                mask_width = sampleSize[0] - ((x + sampleSize[0]) - frame.shape[1])
+            else:
+                win_width = sampleSize[0] + x
+                mask_width = sampleSize[0]
+            B_tmp = B[y:win_height, x:win_width]
+            temp = sum(sum(B_tmp * DPM_1[0:mask_height, 0:mask_width] + np.subtract(
+                np.ones(B_tmp.shape, dtype=np.float32), B_tmp) * DPM_0[0:mask_height, 0:mask_width]))
 
-result = result / np.max(np.max(result))
-int8 = np.uint8(result*255)
-while True:
-        ind = np.unravel_index(np.argmax(result, axis=None), result.shape) # Wykrycie maksimum lokalnego
+            p_x = x + int(sampleSize[0] / 2) if x + int(sampleSize[0] / 2) < frame.shape[1] else x
+
+            result[p_y, p_x] = temp
+
+    result = result / np.max(result)
+    int8 = np.uint8(result * 255)
+
+    while True:
+        ind = np.unravel_index(np.argmax(result, axis=None), result.shape) # Szukanie maksimum lokalnego
         y_max, x_max = ind
-        if (result[y_max, x_max] < 0.5): # Pętla przerwie się, jeśli nie znajdzie się kolejny jasny punkt >= 0.5
+        if (result[y_max, x_max] < 0.5): 
             break
         # Wyrysowanie ramki wokół maksimum
-        rect_x = x_max - int(r_width/2)
-        rect_y = y_max - int(r_height/2)
-        result[rect_y:rect_y+r_height, rect_x:rect_x+r_width] = 0 # Wyzerowanie wykorzystanych punktów
+        rect_x = x_max - int(sampleSize[0]/2)
+        rect_y = y_max - int(sampleSize[1]/2)
+        result[rect_y:rect_y+sampleSize[1], rect_x:rect_x+sampleSize[0]] = 0 # Wyzerowanie użytych pikseli
         # Wyrysowanie prostokąta
-        cv.rectangle(frame, (rect_x, rect_y), (rect_x+r_width, rect_y+r_height), (0, 255, 0), 2)
-cv.imshow("i", int8)
-cv.imwrite("result.png", int8)
-cv.waitKey(0)
+        cv.rectangle(frame, (rect_x, rect_y), (rect_x+sampleSize[0], rect_y+sampleSize[1]), (255, 0, 0), 2)
+
+    cv.imshow('Obraz z kamery', frame)
+    cv.imshow("Labels", int8)
+
+    if cv.waitKey(1) & 0xFF == ord('q'):
+        break
+cap.release()
+
+"""
+Jedną z możliwości detekcji obiektów w innym rozmiarze mogłoby być poszukiwanie wzorca
+w otoczeniu znalezionego już, tzn. gdy wykryjemy na obrazie wzorce nakładamy maskę i
+szukamy wzorca w obrębie obrazu z nałożoną maską
+"""
