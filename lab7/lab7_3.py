@@ -85,6 +85,7 @@ for island in islands_list:
     _, island_coord = contour_norm(contours[min_haus])
 
     cv.putText(map_I, island_name, (int(island_coord[0]), int(island_coord[1])), cv.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255))
+    contours.pop(min_haus)
 
 plt.imshow(map, cmap=plt.cm.gray)
 plt.axis('off')
