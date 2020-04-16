@@ -87,6 +87,7 @@ cv.putText(map_I, island_name, (int(island_coord[0]), int(island_coord[1])), cv.
 plt.imshow(map, cmap=plt.cm.gray)
 plt.axis('off')
 plt.show(block=True)
+map = map * 255
 cv.imwrite('binary_map.png', map)
 
 plt.imshow(img)
@@ -94,10 +95,6 @@ plt.axis('off')
 plt.show(block=True)
 cv.imwrite('islands_cnts.png', img)
 
-'''plt.imshow(map_I)
-plt.axis('off')
-plt.show(block=True)'''
-
 cv.imshow("map", map_I)
-cv.imwrite('names_map', map_I)
+cv.imwrite('names_map.png', map_I)
 cv.waitKey(0)
