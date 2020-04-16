@@ -54,6 +54,11 @@ thresh = cv.threshold(I_G, 127, 255, 0)[1]
 contours, hierarchy = cv.findContours(thresh, cv.RETR_TREE, cv.CHAIN_APPROX_NONE)
 xy, center = contour_norm(contours[0])
 
+cv.drawContours(I, contours, -1, (255, 0, 0))
+plt.imshow(I)
+plt.axis('off')
+plt.show(block=True)
+
 imgs = os.listdir("imgs")
 dist_imgs = []
 for n, i in enumerate(imgs):
@@ -70,8 +75,3 @@ for n, i in enumerate(imgs):
 
 min_haus = np.argmin(dist_imgs)
 print(imgs[min_haus], ', dist= ', dist_imgs[min_haus])
-
-cv.drawContours(I, contours, (255, 0, 0))
-cv.imshow("I", I)
-
-cv.waitKey(0)
