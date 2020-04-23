@@ -74,7 +74,7 @@ for cnt in contours:
         # Długość wektora
         dist = distance.euclidean(center, [x, y])
         # Kąt pomiędzy wektorem a OX
-        a = np.rad2deg(np.arctan2(yl, xl))
+        a = int(np.rad2deg(np.arctan2(yl, xl)))
         Rtable[n].append((dist, a))
 
 im2, sobel2, theta2 = imageProcessing('trybiki2.jpg')
@@ -95,13 +95,13 @@ plt.axis('off')
 accu = np.zeros(im2.shape)  # Inicjalizacja tablicy akumulatorów
 
 for x in range(sobel2.shape[0]):
-    for y in range(sobel2.shape[0]):
+    for y in range(sobel2.shape[1]):
         if sobel2[x, y] > 0.5:
-            for one in Rtable[int(theta2[x, y])]:
-                r = one[0]
-                fi = one[1]
-                x_c = int(x + r * np.cos(fi))
-                y_c = int(y + r * np.sin(fi))
+            for p in Rtable[int(theta2[x, y])]:
+                r = p[0]
+                fi = p[1]
+                x_c = int(x + r * np.cos(np.deg2rad(fi)))
+                y_c = int(y + r * np.sin(np.deg2rad(fi)))
                 if x_c < accu.shape[0] and y_c < accu.shape[1]:
                     accu[x_c, y_c] += 1
 
@@ -112,10 +112,12 @@ plt.figure()
 plt.gray()
 plt.imshow(accu * 255 / accu.max())
 plt.title('Przestrzeń Hougha')
+plt.axis('off')
 
 plt.figure()
 plt.imshow(~im2)
 plt.plot(max_hough[1], max_hough[0], '*m')
 plt.title('Efekt końcowy')
+plt.axis('off')
 
 plt.show()
