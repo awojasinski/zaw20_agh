@@ -1,4 +1,5 @@
 from math import pi
+from scipy.spatial import distance
 
 import cv2 as cv
 import matplotlib.pyplot as plt
@@ -17,9 +18,7 @@ def imageProcessing(filename):
     sobel = sobel / np.amax(sobel)  # Normalizacja
 
     # Orientacja gradientu
-    theta = np.arctan2(sobely, sobelx)
-    theta = theta * (theta >= 0) + (theta + 2 * pi) * (theta < 0)
-    theta = (theta * 180) / pi
+    theta = np.rad2deg(np.arctan2(sobely, sobelx))
 
     return im, sobel, theta
 
@@ -29,17 +28,36 @@ kernel = np.ones((5, 5), np.uint8)
 im, sobel, theta = imageProcessing('trybik.jpg')
 
 # Binaryzacja i kontury
-thresh = cv.threshold(im, 55, 255, 0)[1]
-thresh = cv.dilate(thresh, kernel)
-thresh = cv.erode(thresh, kernel)
+thresh = cv.threshold(im, 100, 255, 0)[1]
 contours, hierarchy = cv.findContours(thresh, cv.RETR_TREE, cv.CHAIN_APPROX_NONE)
+
+# Rysowanie konturów
+zeros = np.zeros(shape=im.shape, dtype=float)
+cv.drawContours(zeros, contours, -1, (255, 0, 0))
+plt.figure()
+plt.gray()
+plt.imshow(zeros)
+plt.title('Kontur')
+plt.axis('off')
+
+# Rysowanie Orientacji gradientu i gradientu
+plt.figure(figsize=(12, 6))
+plt.subplot(1, 2, 2)
+plt.gray()
+plt.imshow(theta)
+plt.title('Orientacja gradientu')
+plt.axis('off')
+plt.subplot(1, 2, 1)
+plt.gray()
+plt.imshow(sobel)
+plt.title('Gradient')
+plt.axis('off')
 
 # Wyznaczenie środka ciężkości
 center = [0, 0]
-m = cv.moments(contours[0], 1)
-if m["m00"] != 0:
-    center[0] = int(m["m10"] / m["m00"])  # Obliczenie współrzędnej X
-    center[1] = int(m["m01"] / m["m00"])  # Obliczenie współrzędnej Y
+m = cv.moments(thresh, 1)
+center[0] = int(m["m10"] / m["m00"])  # Obliczenie współrzędnej X
+center[1] = int(m["m01"] / m["m00"])  # Obliczenie współrzędnej Y
 
 Rtable = [[] for i in range(360)]
 
@@ -51,23 +69,33 @@ for cnt in contours:
         # Orientacja gradientu w punkcie konturu
         n = int(theta[x, y])
         # Długości odcinków wzdlędem punktu referencyjnego
-        xl = (x - center[0])
+        xl = (center[0] - x)
         yl = (center[1] - y)
         # Długość wektora
-        l = np.sqrt(xl ** 2 + yl ** 2)
+        dist = distance.euclidean(center, [x, y])
         # Kąt pomiędzy wektorem a OX
-        a = np.arctan2(yl, xl)
-        a = a * (a >= 0) + (a + 2 * pi) * (a < 0)
-        a = (a * 180) / pi
-        vect = [l, a]
-        Rtable[n].append(vect)
+        a = np.rad2deg(np.arctan2(yl, xl))
+        Rtable[n].append((dist, a))
 
 im2, sobel2, theta2 = imageProcessing('trybiki2.jpg')
+
+# Rysowanie Orientacji gradientu i gradientu
+plt.figure(figsize=(12, 6))
+plt.subplot(1, 2, 2)
+plt.gray()
+plt.imshow(theta2)
+plt.title('Orientacja gradientu')
+plt.axis('off')
+plt.subplot(1, 2, 1)
+plt.gray()
+plt.imshow(sobel2)
+plt.title('Gradient')
+plt.axis('off')
 
 accu = np.zeros(im2.shape)  # Inicjalizacja tablicy akumulatorów
 
 for x in range(sobel2.shape[0]):
-    for y in range(sobel2.shape[1]):
+    for y in range(sobel2.shape[0]):
         if sobel2[x, y] > 0.5:
             for one in Rtable[int(theta2[x, y])]:
                 r = one[0]
@@ -91,8 +119,3 @@ plt.plot(max_hough[1], max_hough[0], '*m')
 plt.title('Efekt końcowy')
 
 plt.show()
-
-cv.imshow('I', im)
-cv.imshow('B', thresh)
-cv.imshow('Sobel', sobel)
-cv.waitKey(0)
