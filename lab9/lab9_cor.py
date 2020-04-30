@@ -26,7 +26,7 @@ comnj = comnj / np.abs(comnj)
 corr = np.abs(np.fft.ifft2(comnj))
 
 y, x = np.unravel_index(np.argmax(corr), corr.shape)
-transM = np.float32([[1, 0, x], [0, 1, y]])     #x, y - wektor przesuniecia
+transM = np.float32([[1, 0, x], [0, 1, y]])     # x, y - wektor przesuniecia
 im_m = cv.warpAffine(im_w, transM, (im_p.shape[1], im_p.shape[0]))
 
 # Wyświetlenie obrazów

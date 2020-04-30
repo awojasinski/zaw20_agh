@@ -68,7 +68,7 @@ for i in range(0, 330, 30):
     a1 = - A
     a2 = 180 - A
 
-    scale = np.exp(w / M)  # gdzie M to parametr funkcji cv2.logPolar
+    scale = np.exp(w / M)  # M to parametr funkcji cv2.logPolar
     print(scale)
 
     im = np.zeros(im_p.shape)
@@ -110,7 +110,7 @@ for i in range(0, 330, 30):
         dx = dx - im_p.shape[0]
 
     print(dx, dy)
-    transM = np.float32([[1, 0, dx], [0, 1, dy]])  # gdzie dx, dy - wektor przesuniecia
+    transM = np.float32([[1, 0, dx], [0, 1, dy]])  # dx, dy - wektor przesuniecia
     im_m = cv.warpAffine(pattern_m, transM, (im_p.shape[1], im_p.shape[0]))
 
     plt.figure(figsize=(12, 6))
@@ -166,7 +166,7 @@ for i in range(10, 80, 10):
     a1 = - A
     a2 = 180 - A
 
-    scale = np.exp(w / M)  # gdzie M to parametr funkcji cv2.logPolar
+    scale = np.exp(w / M)  # M to parametr funkcji cv2.logPolar
     print(scale)
 
     im = np.zeros(im_p.shape)
@@ -207,7 +207,7 @@ for i in range(10, 80, 10):
     dy = dy - im_p.shape[1]
 
     print(dx, dy)
-    transM = np.float32([[1, 0, dx], [0, 1, dy]])  # gdzie dx, dy - wektor przesuniecia
+    transM = np.float32([[1, 0, dx], [0, 1, dy]])  # dx, dy - wektor przesuniecia
     im_m = cv.warpAffine(pattern_m, transM, (im_p.shape[1], im_p.shape[0]))
 
     plt.figure(figsize=(12, 6))
