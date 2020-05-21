@@ -1,8 +1,8 @@
 import numpy as np
 import cv2 as cv
+import scipy.ndimage
 import scipy.ndimage.filters as filters
 import matplotlib.pyplot as plt
-import skimage.transform
 import math
 
 
@@ -40,7 +40,7 @@ def HOGpicture(w, bs): # w - histogramy gradientow obrazu, bs - rozmiar komorki 
     bim = np.zeros(bim1.shape+(9,))
     bim[:, :, 0] = bim1
     for i in range(0, 9): #2:9,
-        bim[:, :, i] = skimage.transform.rotate(bim1, -i*20, mode='symmetric', resize=False)/255
+        bim[:, :, i] = scipy.ndimage.rotate(bim1, -i*20, mode='nearest', reshape=False)/255
         Y, X, Z = w.shape
         w[w < 0] = 0
         im = np.zeros((bs*Y, bs*X))
