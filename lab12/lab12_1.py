@@ -111,11 +111,12 @@ def hog(image):
                 hist[jj, ii, i0] = hist[jj, ii, i0] + m*(1-d)
                 hist[jj, ii, i1] = hist[jj, ii, i1] + m*(d)
 
-    #wyswietlanie obrazka
+    #wyswietlanie gradientu
+    '''    
     imho = HOGpicture(hist, 8)
     plt.imshow(imho)
     plt.show()
-
+    '''
     # Normalizacja w blokach
     e = math.pow(0.00001, 2)
     F = []
@@ -133,11 +134,16 @@ def hog(image):
     return F
 
 
-I_1 = cv.imread('pedestrians/pos/per00060.ppm')
-I_1 = cv.cvtColor(I_1, cv.COLOR_BGR2RGB)
-plt.imshow(I_1)
-plt.axis('off')
-plt.show()
-F_vector = hog(I_1)
-print(len(F_vector))
-print(F_vector[0:10])
+def main():
+    I_1 = cv.imread('pedestrians/pos/per00060.ppm')
+    I_1 = cv.cvtColor(I_1, cv.COLOR_BGR2RGB)
+    plt.imshow(I_1)
+    plt.axis('off')
+    plt.show()
+    F_vector = hog(I_1)
+    print(len(F_vector))
+    print(F_vector[0:10])
+
+
+if __name__ == '__main__':
+    main()
